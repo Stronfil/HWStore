@@ -1,0 +1,50 @@
+version: '3.2'
+
+volumes:
+  store-postgres:
+    driver: local
+
+networks:
+  postgres-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:9.6
+    container_name: store-postgres
+    volumes:
+      - type: volume
+        source: store-postgres
+        target: /var/lib/postgresql/dataConfig
+    networks:
+      - postgres-network
+    environment:
+      POSTGRES_DB: store
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespass
+    ports:
+      - "5432:5432"
+
+  store-front:
+    build: ./store-front
+    container_name: store-front
+    networks:
+      - postgres-network
+    ports:
+      - "8189:8189"
+
+  store-service:
+    build: ./store-service
+    container_name: store-service
+    networks:
+      - postgres-network
+    ports:
+      - "8190:8190"
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    networks:
+      - postgres-network
+    ports:
+      - "8761:8761"
